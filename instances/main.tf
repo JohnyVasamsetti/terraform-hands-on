@@ -85,6 +85,20 @@ resource "aws_route_table_association" "private_sn_association" {
   subnet_id      = aws_subnet.private_subnet.id
 }
 
+# key pair
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+resource "aws_key_pair" "instance_key" {
+  key_name = "instance_key"
+  public_key = tls_private_key.ssh_key.public_key_openssh
+}
+resource "local_file" "private_key" {
+  filename = "private_key.pem"
+  content = tls_private_key.ssh_key.private_key_pem
+}
+
 # Creating Ec2 instances
 resource "aws_instance" "public_instance" {
   ami           = local.ami_id
@@ -92,6 +106,7 @@ resource "aws_instance" "public_instance" {
   subnet_id     = aws_subnet.public_subnet.id
   user_data     = file("user_data.sh")
   security_groups = [aws_security_group.public_instance_sg.id]
+  key_name = aws_key_pair.instance_key.key_name
   tags = {
     task = "instances"
     Name = "public_instance"
@@ -105,6 +120,12 @@ resource "aws_security_group" "public_instance_sg" {
   ingress {
     from_port = 80
     to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 22
+    to_port = 22
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
