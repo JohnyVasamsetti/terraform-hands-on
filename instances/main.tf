@@ -6,6 +6,13 @@ resource "aws_vpc" "mumbai_vpc" {
   }
 }
 
+resource "aws_internet_gateway" "mumbai_igw" {
+  vpc_id = aws_vpc.mumbai_vpc.id
+  tags = {
+    Name = "mumbai_igw"
+  }
+}
+
 resource "aws_subnet" "public_subnet" {
   vpc_id = aws_vpc.mumbai_vpc.id
   cidr_block = local.public_subnet_cidr_block
