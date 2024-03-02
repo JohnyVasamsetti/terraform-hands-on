@@ -22,7 +22,7 @@ resource "aws_eip" "public_eip" {
   }
 }
 resource "aws_nat_gateway" "mumbai_ngw" {
-  subnet_id = aws_subnet.public_subnet.id
+  subnet_id     = aws_subnet.public_subnet.id
   allocation_id = aws_eip.public_eip.id
   tags = {
     task = "instances"
@@ -32,9 +32,10 @@ resource "aws_nat_gateway" "mumbai_ngw" {
 
 # Subnets
 resource "aws_subnet" "public_subnet" {
-  vpc_id = aws_vpc.mumbai_vpc.id
-  cidr_block = local.public_subnet_cidr_block
-  availability_zone = "ap-south-1a"
+  vpc_id                  = aws_vpc.mumbai_vpc.id
+  cidr_block              = local.public_subnet_cidr_block
+  availability_zone       = "ap-south-1a"
+  map_public_ip_on_launch = true
   tags = {
     task = "instances"
     Name = "public_subnet"
@@ -42,7 +43,7 @@ resource "aws_subnet" "public_subnet" {
 }
 
 resource "aws_subnet" "private_subnet" {
-  vpc_id = aws_vpc.mumbai_vpc.id
+  vpc_id     = aws_vpc.mumbai_vpc.id
   cidr_block = local.private_subnet_cidr_block
   tags = {
     task = "instances"
@@ -70,16 +71,57 @@ resource "aws_route_table" "private_route_table" {
   }
   tags = {
     task = "instances"
-    Name = "public_route_table"
+    Name = "private_route_table"
   }
 }
 
 # Attaching route tables with subnets
 resource "aws_route_table_association" "public_rt_association" {
   route_table_id = aws_route_table.public_route_table.id
-  subnet_id = aws_subnet.public_subnet.id
+  subnet_id      = aws_subnet.public_subnet.id
 }
 resource "aws_route_table_association" "private_sn_association" {
   route_table_id = aws_route_table.private_route_table.id
-  subnet_id = aws_subnet.private_subnet.id
+  subnet_id      = aws_subnet.private_subnet.id
+}
+
+# Creating Ec2 instances
+resource "aws_instance" "public_instance" {
+  ami           = local.ami_id
+  instance_type = local.instance_type
+  subnet_id     = aws_subnet.public_subnet.id
+  user_data     = file("user_data.sh")
+  security_groups = [aws_security_group.public_instance_sg.id]
+  tags = {
+    task = "instances"
+    Name = "public_instance"
+  }
+}
+
+# Security groups
+resource "aws_security_group" "public_instance_sg" {
+  name = "public_instance_sg"
+  vpc_id = aws_vpc.mumbai_vpc.id
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = -1
+    to_port = -1
+    protocol = "icmp"
+    cidr_blocks = [ "0.0.0.0/0" ]
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    task = "instances"
+    Name = "public_instance_sg"
+  }
 }
