@@ -6,13 +6,31 @@ resource "aws_vpc" "mumbai_vpc" {
   }
 }
 
+# Gateways
 resource "aws_internet_gateway" "mumbai_igw" {
   vpc_id = aws_vpc.mumbai_vpc.id
   tags = {
+    task = "instances"
     Name = "mumbai_igw"
   }
 }
+resource "aws_eip" "public_eip" {
+  domain = "vpc"
+  tags = {
+    task = "instances"
+    Name = "public_eip"
+  }
+}
+resource "aws_nat_gateway" "mumbai_ngw" {
+  subnet_id = aws_subnet.public_subnet.id
+  allocation_id = aws_eip.public_eip.id
+  tags = {
+    task = "instances"
+    Name = "mumbai_ngw"
+  }
+}
 
+# Subnets
 resource "aws_subnet" "public_subnet" {
   vpc_id = aws_vpc.mumbai_vpc.id
   cidr_block = local.public_subnet_cidr_block
