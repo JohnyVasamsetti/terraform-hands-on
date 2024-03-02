@@ -91,7 +91,7 @@ resource "tls_private_key" "ssh_key" {
   rsa_bits  = 4096
 }
 resource "aws_key_pair" "instance_key" {
-  key_name = "instance_key"
+  key_name   = "instance_key"
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 resource "aws_secretsmanager_secret" "key_pair_secret" {
@@ -99,29 +99,29 @@ resource "aws_secretsmanager_secret" "key_pair_secret" {
 }
 resource "aws_secretsmanager_secret_version" "instance_key_version" {
   secret_string = tls_private_key.ssh_key.private_key_pem
-  secret_id = aws_secretsmanager_secret.key_pair_secret.id
+  secret_id     = aws_secretsmanager_secret.key_pair_secret.id
 }
 
 # Creating Ec2 instances
 resource "aws_instance" "public_instance" {
-  ami           = local.ami_id
-  instance_type = local.instance_type
-  subnet_id     = aws_subnet.public_subnet.id
-  user_data     = file("user_data.sh")
+  ami             = local.ami_id
+  instance_type   = local.instance_type
+  subnet_id       = aws_subnet.public_subnet.id
+  user_data       = file("user_data.sh")
   security_groups = [aws_security_group.public_instance_sg.id]
-  key_name = aws_key_pair.instance_key.key_name
+  key_name        = aws_key_pair.instance_key.key_name
   tags = {
     task = "instances"
     Name = "public_instance"
   }
 }
 resource "aws_instance" "private_instance" {
-  ami           = local.ami_id
-  instance_type = local.instance_type
-  subnet_id     = aws_subnet.private_subnet.id
-  user_data     = file("user_data.sh")
+  ami             = local.ami_id
+  instance_type   = local.instance_type
+  subnet_id       = aws_subnet.private_subnet.id
+  user_data       = file("user_data.sh")
   security_groups = [aws_security_group.private_instance_sg.id]
-  key_name = aws_key_pair.instance_key.key_name
+  key_name        = aws_key_pair.instance_key.key_name
   tags = {
     task = "instances"
     Name = "private_instance"
@@ -130,30 +130,30 @@ resource "aws_instance" "private_instance" {
 
 # Security groups
 resource "aws_security_group" "public_instance_sg" {
-  name = "public_instance_sg"
+  name   = "public_instance_sg"
   vpc_id = aws_vpc.mumbai_vpc.id
   ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port = -1
-    to_port = -1
-    protocol = "icmp"
-    cidr_blocks = [ "0.0.0.0/0" ]
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
@@ -162,24 +162,24 @@ resource "aws_security_group" "public_instance_sg" {
   }
 }
 resource "aws_security_group" "private_instance_sg" {
-  name = "private_instance_sg"
+  name   = "private_instance_sg"
   vpc_id = aws_vpc.mumbai_vpc.id
   ingress {
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
     cidr_blocks = [local.public_subnet_cidr_block]
   }
   ingress {
-    from_port = -1
-    to_port = -1
-    protocol = "icmp"
-    cidr_blocks = [ local.public_subnet_cidr_block ]
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = [local.public_subnet_cidr_block]
   }
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
