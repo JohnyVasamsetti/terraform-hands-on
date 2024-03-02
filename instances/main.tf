@@ -94,9 +94,12 @@ resource "aws_key_pair" "instance_key" {
   key_name = "instance_key"
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
-resource "local_file" "private_key" {
-  filename = "private_key.pem"
-  content = tls_private_key.ssh_key.private_key_pem
+resource "aws_secretsmanager_secret" "key_pair_secret" {
+  name = "key_pair_secret"
+}
+resource "aws_secretsmanager_secret_version" "instance_key_version" {
+  secret_string = tls_private_key.ssh_key.private_key_pem
+  secret_id = aws_secretsmanager_secret.key_pair_secret.id
 }
 
 # Creating Ec2 instances
