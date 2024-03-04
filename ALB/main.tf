@@ -44,6 +44,7 @@ resource "aws_subnet" "public_subnet_2" {
 resource "aws_subnet" "private_subnet" {
   vpc_id     = aws_vpc.virginia_vpc.id
   cidr_block = local.private_subnet_cidr_block
+  availability_zone = "us-east-1a"
   tags = {
     task = "ALB"
     Name = "private_subnet"
@@ -53,6 +54,7 @@ resource "aws_subnet" "private_subnet" {
 resource "aws_subnet" "private_subnet_2" {
   vpc_id     = aws_vpc.virginia_vpc.id
   cidr_block = local.private_subnet_cidr_block_2
+  availability_zone = "us-east-1b"
   tags = {
     task = "ALB"
     Name = "private_subnet_2"
