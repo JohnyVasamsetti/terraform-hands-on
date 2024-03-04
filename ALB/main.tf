@@ -28,6 +28,17 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
+resource "aws_subnet" "public_subnet_2" {
+  vpc_id                  = aws_vpc.virginia_vpc.id
+  cidr_block              = local.public_subnet_cidr_block_2
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = true
+  tags = {
+    task = "ALB"
+    Name = "public_subnet_2"
+  }
+}
+
 # Subnets
 
 resource "aws_subnet" "private_subnet" {
