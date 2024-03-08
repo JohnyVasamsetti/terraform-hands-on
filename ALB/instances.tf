@@ -45,6 +45,6 @@ resource "aws_security_group" "private_instance_sg" {
   }
   tags = {
     task = "ALB"
-    Name = "public_instance_sg"
+    Name = "private_instance_sg"
   }
 }
