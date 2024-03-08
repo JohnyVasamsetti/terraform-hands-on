@@ -2,7 +2,7 @@ resource "aws_launch_template" "launch_template" {
   name_prefix = "launch-instance-"
   image_id      = local.ami_id
   instance_type = local.instance_type
-  vpc_security_group_ids = [aws_security_group.private_instance_sg.id]
+  vpc_security_group_ids = [aws_security_group.private_instance_sg.id,aws_security_group.public_instance_sg.id]
 }
 
 resource "aws_autoscaling_group" "auto_scaling" {
@@ -14,9 +14,6 @@ resource "aws_autoscaling_group" "auto_scaling" {
 
   launch_template {
     id      = aws_launch_template.launch_template.id
+    version = "$Latest"
   }
-}
-
-output "private_sg" {
-  value = aws_security_group.private_instance_sg.id
 }
